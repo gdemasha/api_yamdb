@@ -93,8 +93,16 @@ class Reviews(models.Model):
         ],
         blank=True,
     )
-    # author = models.ForeignKey(User, choices='user', on_delete=models.CASCADE)
-    title = models.ForeignKey(Title, on_delete=models.CASCADE)
+    # author = models.ForeignKey(
+    #     User,
+    #     choices='user',
+    #     on_delete=models.CASCADE
+    # )
+    title = models.ForeignKey(
+        Title,
+        on_delete=models.CASCADE,
+        related_name='reviews'
+    )
 
     class Meta:
         verbose_name = 'отзыв'
