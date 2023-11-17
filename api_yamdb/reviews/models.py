@@ -6,6 +6,8 @@ from reviews.constants import MAX_LENGTH_NAME, MAX_LENGTH_SLUG
 
 # User = get_user_model()
 
+from reviews.constants import MAX_LENGTH_NAME, MAX_LENGTH_SLUG
+
 
 class Category(models.Model):
     name = models.CharField('Название категории', max_length=MAX_LENGTH_NAME)
