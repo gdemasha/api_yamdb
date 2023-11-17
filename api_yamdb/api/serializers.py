@@ -72,6 +72,4 @@ class TitlesSerializer(serializers.ModelSerializer):
         return super().create(validated_data)
 
     def get_rating(self, obj):
-        return 1
-        # пока так
         return int(obj.reviews_score.aggregate(rating=Avg('score'))['rating'])
