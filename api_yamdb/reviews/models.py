@@ -1,4 +1,10 @@
 from django.db import models
+# from django.contrib.auth import get_user_model
+from django.core.validators import MaxValueValidator, MinValueValidator
+
+from reviews.constants import MAX_LENGTH_NAME, MAX_LENGTH_SLUG
+
+# User = get_user_model()
 
 from reviews.constants import MAX_LENGTH_NAME, MAX_LENGTH_SLUG
 
@@ -13,7 +19,7 @@ class Category(models.Model):
             'Идентификатор категории произведения. '
             f'Не более {MAX_LENGTH_SLUG} символов. '
             'Разрешены символы латиницы и символы: ^[-a-zA-Z0-9_]+$'
-        )
+        ),
     )
 
     class Meta:
@@ -33,7 +39,7 @@ class Genre(models.Model):
         help_text=(
             f'Идентификатор жанра. Не более {MAX_LENGTH_SLUG} символов. '
             'Разрешены символы латиницы и символы: ^[-a-zA-Z0-9_]+$'
-        )
+        ),
     )
 
     class Meta:
@@ -47,7 +53,7 @@ class Genre(models.Model):
 class Title(models.Model):
     name = models.CharField(
         'Название произведения',
-        max_length=MAX_LENGTH_NAME
+        max_length=MAX_LENGTH_NAME,
     )
     description = models.TextField('Описание')
     year = models.IntegerField('Год релиза')
@@ -56,12 +62,12 @@ class Title(models.Model):
         verbose_name='Тип произведения',
         on_delete=models.SET_NULL,
         related_name='titles',
-        null=True
+        null=True,
     )
     genre = models.ManyToManyField(
         Genre,
         verbose_name='Жанр(ы) произведения',
-        related_name='titles'
+        related_name='titles',
     )
 
     class Meta:
@@ -70,3 +76,45 @@ class Title(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Reviews(models.Model):
+
+    text = models.TextField()
+    pub_date = models.DateTimeField(
+        'Дата публикации отзыва',
+        auto_now_add=True,
+    )
+    score = models.PositiveIntegerField(
+        default=1,
+        validators=[
+            MaxValueValidator(10),
+            MinValueValidator(1),
+        ],
+        blank=True,
+    )
+    # author = models.ForeignKey(User, choices='user', on_delete=models.CASCADE)
+    title = models.ForeignKey(Title, on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = 'отзыв'
+        verbose_name_plural = 'Отзывы'
+
+
+class Comments(models.Model):
+
+    text = models.TextField()
+    pub_date = models.DateTimeField(
+        'Дата публикации комментария',
+        auto_now_add=True,
+    )
+    review = models.ForeignKey(
+        Reviews,
+        on_delete=models.CASCADE,
+        related_name='review',
+    )
+    # author = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = 'комментарий'
+        verbose_name_plural = 'Комментарии'
