@@ -4,7 +4,8 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     genre_delete, GenresViewSet,
     category_delete, CategoriesViewSet,
-    ReviewsViewSet, TitlesViewSet
+    ReviewsViewSet, TitlesViewSet,
+    CommentsViewSet,
 )
 
 router = DefaultRouter()
@@ -18,13 +19,13 @@ router.register(
 )
 router.register(
     r'^titles/(?P<title_id>\d+)/reviews/(?P<review_id>\d+)/comments',
-    ReviewsViewSet,
+    CommentsViewSet,
     basename='comments',
 )
 router.register(
     (r'^titles/(?P<title_id>\d+)/reviews/(?P<review_id>\d+)'
      r'/comments/(?P<comment_id>\d+)/$'),
-    ReviewsViewSet,
+    CommentsViewSet,
     basename='comment',
 )
 router.register('categories', CategoriesViewSet, basename='categories')

@@ -3,3 +3,6 @@ MAX_LENGTH_NAME = 256
 
 # Максимальная длина slug категории/жанра
 MAX_LENGTH_SLUG = 50
+
+# Выбор пользователя
+ROLE_CHOICE = ('user', 'moderator', 'admin')

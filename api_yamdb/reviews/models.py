@@ -5,9 +5,8 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 
 from reviews.constants import MAX_LENGTH_NAME, MAX_LENGTH_SLUG
 
-User = get_user_model()
 
-from reviews.constants import MAX_LENGTH_NAME, MAX_LENGTH_SLUG
+User = get_user_model()
 
 
 class CustomUser(AbstractUser):
@@ -107,14 +106,14 @@ class Reviews(models.Model):
         blank=True,
     )
     # author = models.ForeignKey(
-    #     User,
-    #     choices='user',
-    #     on_delete=models.CASCADE
-    # )
+    # User,
+    # choices='user',
+    # on_delete=models.CASCADE
+    # $)
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
-        related_name='reviews'
+        related_name='reviews',
     )
 
     class Meta:
@@ -132,7 +131,7 @@ class Comments(models.Model):
     review = models.ForeignKey(
         Reviews,
         on_delete=models.CASCADE,
-        related_name='review',
+        related_name='comments',
     )
     # author = models.ForeignKey(User, on_delete=models.CASCADE)
 
