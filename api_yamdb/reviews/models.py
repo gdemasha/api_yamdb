@@ -1,10 +1,10 @@
 from django.db import models
-from django.contrib.auth import get_user_model
+# from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 
 from reviews.constants import MAX_LENGTH_NAME, MAX_LENGTH_SLUG
 
-User = get_user_model()
+# User = get_user_model()
 
 
 class Category(models.Model):
@@ -91,7 +91,7 @@ class Reviews(models.Model):
         ],
         blank=True,
     )
-    #  author = models.ForeignKey(User, on_delete=models.CASCADE)
+    # author = models.ForeignKey(User, choices='user', on_delete=models.CASCADE)
     title = models.ForeignKey(Title, on_delete=models.CASCADE)
 
     class Meta:
@@ -111,7 +111,7 @@ class Comments(models.Model):
         on_delete=models.CASCADE,
         related_name='review',
     )
-    #  author = models.ForeignKey(User, on_delete=models.CASCADE)
+    # author = models.ForeignKey(User, on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = 'комментарий'

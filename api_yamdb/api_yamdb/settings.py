@@ -22,9 +22,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'reviews.apps.ReviewsConfig',
-    'reviews.apps.ReviewsConfig',
     'api.apps.ApiConfig',
-    'user.apps.ApiConfig',
+    'user.apps.UserConfig',
 ]
 
 MIDDLEWARE = [
@@ -67,10 +66,6 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
-# User
-
-AUTH_USER_MODEL = 'user.CustomUser'
 
 # Password validation
 
