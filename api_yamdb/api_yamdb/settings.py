@@ -21,6 +21,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'reviews.apps.ReviewsConfig',
+    'reviews.apps.ReviewsConfig',
+    'api.apps.ApiConfig',
+    'user.apps.ApiConfig',
 ]
 
 MIDDLEWARE = [
@@ -64,6 +68,9 @@ DATABASES = {
     }
 }
 
+# User
+
+AUTH_USER_MODEL = 'user.CustomUser'
 
 # Password validation
 
@@ -85,7 +92,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru-RU'
 
 TIME_ZONE = 'UTC'
 
@@ -101,3 +108,11 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = ((BASE_DIR / 'static/'),)
+
+
+# Settings for DRF
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 5,
+}
