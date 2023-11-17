@@ -1,12 +1,25 @@
 from django.db import models
-# from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 
 from reviews.constants import MAX_LENGTH_NAME, MAX_LENGTH_SLUG
 
-# User = get_user_model()
+User = get_user_model()
 
 from reviews.constants import MAX_LENGTH_NAME, MAX_LENGTH_SLUG
+
+
+class CustomUser(AbstractUser):
+    ROLE_CHOICE = ('user', 'moderator', 'admin')
+
+    bio = models.CharField('Био', max_length=256, null=True, blank=True,)
+    role = models.CharField(
+        'Роль',
+        max_length=9,
+        choices=ROLE_CHOICE,
+        default='user',
+    )
 
 
 class Category(models.Model):
