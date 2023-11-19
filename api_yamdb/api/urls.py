@@ -5,7 +5,7 @@ from .views import (
     genre_delete, GenresViewSet,
     category_delete, CategoriesViewSet,
     ReviewsViewSet, TitlesViewSet,
-    CommentsViewSet,
+    CommentsViewSet, UserViewSet
 )
 
 router = DefaultRouter()
@@ -28,6 +28,7 @@ router.register(
     CommentsViewSet,
     basename='comment',
 )
+router.register('users', UserViewSet, basename='users')
 router.register('categories', CategoriesViewSet, basename='categories')
 router.register('genres', GenresViewSet, basename='genres')
 router.register('titles', TitlesViewSet, basename='titles')

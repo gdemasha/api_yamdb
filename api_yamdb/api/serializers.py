@@ -2,7 +2,9 @@ from rest_framework import serializers
 
 from django.db.models import Avg
 
-from reviews.models import Reviews, Comments, Category, Genre, Title
+from reviews.models import (
+    Reviews, Comments, Category, Genre, Title, CustomUser
+)
 import datetime as dt
 
 
@@ -73,3 +75,22 @@ class TitlesSerializer(serializers.ModelSerializer):
 
     def get_rating(self, obj):
         return int(obj.reviews_score.aggregate(rating=Avg('score'))['rating'])
+
+
+class UserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = CustomUser
+        fields = (
+            'username', 'email', 'first_name', 'last_name', 'bio', 'role'
+        )
+        read_only_fields = ('role',)
+
+
+class AdminSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = CustomUser
+        fields = (
+            'username', 'email', 'first_name', 'last_name', 'bio', 'role'
+        )
