@@ -1,17 +1,11 @@
 from django.db import models
-from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 
-from reviews.constants import MAX_LENGTH_NAME, MAX_LENGTH_SLUG
-
-
-User = get_user_model()
+from reviews.constants import MAX_LENGTH_NAME, MAX_LENGTH_SLUG, ROLE_CHOICE
 
 
 class CustomUser(AbstractUser):
-    ROLE_CHOICE = ('user', 'moderator', 'admin')
-
     bio = models.CharField('Био', max_length=256, null=True, blank=True,)
     role = models.CharField(
         'Роль',
@@ -105,11 +99,10 @@ class Reviews(models.Model):
         ],
         blank=True,
     )
-    # author = models.ForeignKey(
-    # User,
-    # choices='user',
-    # on_delete=models.CASCADE
-    # $)
+    author = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+    )
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
@@ -119,6 +112,12 @@ class Reviews(models.Model):
     class Meta:
         verbose_name = 'отзыв'
         verbose_name_plural = 'Отзывы'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['author', 'title'],
+                name='unique_review',
+            )
+        ]
 
 
 class Comments(models.Model):
@@ -133,7 +132,10 @@ class Comments(models.Model):
         on_delete=models.CASCADE,
         related_name='comments',
     )
-    # author = models.ForeignKey(User, on_delete=models.CASCADE)
+    author = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+    )
 
     class Meta:
         verbose_name = 'комментарий'

@@ -5,4 +5,8 @@ MAX_LENGTH_NAME = 256
 MAX_LENGTH_SLUG = 50
 
 # Выбор пользователя
-ROLE_CHOICE = ('user', 'moderator', 'admin')
+ROLE_CHOICE = (
+    ('user', 'user'),
+    ('moderator', 'moderator'),
+    ('admin', 'admin'),
+)
