@@ -27,3 +27,12 @@ class AdminUserPermission(BasePermission):
         elif request.user.is_authenticated:
             return request.user.is_staff or request.user.role == 'admin'
         return False
+
+
+class AdminOnlyPermission(BasePermission):
+
+    def has_permission(self, request, view):
+        if request.user.is_authenticated:
+            return request.user.is_staff or request.user.role == 'admin'
+        return False
+

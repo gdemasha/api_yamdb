@@ -6,13 +6,22 @@ from reviews.constants import MAX_LENGTH_NAME, MAX_LENGTH_SLUG, ROLE_CHOICE
 
 
 class CustomUser(AbstractUser):
-    bio = models.CharField('Био', max_length=256, null=True, blank=True,)
+    email = models.EmailField('Почта', max_length=254, unique=True,)
+    bio = models.CharField('Био', max_length=254, null=True, blank=True,)
     role = models.CharField(
         'Роль',
         max_length=9,
         choices=ROLE_CHOICE,
         default='user',
     )
+
+    class Meta:
+        ordering = ('username',)
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
+
+    def __str__(self):
+        return self.username
 
 
 class Category(models.Model):

@@ -1,5 +1,5 @@
 from rest_framework import filters, status, viewsets, permissions
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
@@ -8,10 +8,11 @@ from reviews.models import Genre, Category, Reviews, Title, CustomUser
 from .serializers import (
     ReviewsSerializer, CommentSerializer, GenreSerializer,
     CategoriesSerializer, TitlesSerializer, UserSerializer,
+    AdminSerializer,
 )
 from .permissions import (
     AuthorOrModeratorOrAdminPermission,
-    AdminUserPermission,
+    AdminUserPermission, AdminOnlyPermission,
 )
 
 
@@ -100,3 +101,34 @@ def category_delete(request, slug):
     if request.method == "DELETE":
         category.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    lookup_field = 'username'
+    queryset = CustomUser.objects.all()
+    serializer_class = AdminSerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('username',)
+    permission_classes = (AdminOnlyPermission,)
+
+    def update(self, request, *args, **kwargs):
+        if request.method == 'PUT':
+            return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return super().update(request, *args, **kwargs)
+
+    @action(
+        methods=['GET', 'PATCH', ],
+        detail=False,
+        permission_classes=(permissions.IsAuthenticated,),
+        url_path='me',
+    )
+    def get(self, request):
+        if request.method == 'GET':
+            serializer = UserSerializer(request.user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        serializer = UserSerializer(
+            request.user, data=request.data, partial=True,
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save(role=request.user.role)
+        return Response(serializer.data, status=status.HTTP_200_OK)
