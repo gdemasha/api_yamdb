@@ -1,11 +1,20 @@
+from django.shortcuts import get_list_or_404, get_object_or_404
 from rest_framework import serializers
-
 from django.db.models import Avg
 
 from reviews.models import (
     Reviews, Comments, Category, Genre, Title, CustomUser
 )
 import datetime as dt
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = (
+            'username', 'email', 'first_name',
+            'last_name', 'bio', 'role',
+        )
 
 
 class ReviewsSerializer(serializers.ModelSerializer):
@@ -67,14 +76,21 @@ class TitlesSerializer(serializers.ModelSerializer):
         return value
 
     def get_rating(self, obj):
-        return 0
+        return int(obj.reviews_score.aggregate(rating=Avg('score'))['rating'])
 
     def create(self, validated_data):
-        print(validated_data.keys())
-        return super().create(validated_data)
-
-    def get_rating(self, obj):
-        return int(obj.reviews_score.aggregate(rating=Avg('score'))['rating'])
+        title = Title.objects.create(
+            **validated_data,
+            category=get_object_or_404(
+                Category,
+                slug=self.initial_data['category'],
+            ),
+        )
+        title.genre.set(get_list_or_404(
+            Genre,
+            slug__in=self.initial_data['genre'],
+        ))
+        return title
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -94,3 +110,4 @@ class AdminSerializer(serializers.ModelSerializer):
         fields = (
             'username', 'email', 'first_name', 'last_name', 'bio', 'role'
         )
+

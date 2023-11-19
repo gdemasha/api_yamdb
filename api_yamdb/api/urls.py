@@ -5,7 +5,7 @@ from .views import (
     genre_delete, GenresViewSet,
     category_delete, CategoriesViewSet,
     ReviewsViewSet, TitlesViewSet,
-    CommentsViewSet, UserViewSet
+    CommentsViewSet, UserViewSet,
 )
 
 router = DefaultRouter()
