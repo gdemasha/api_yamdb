@@ -1,11 +1,12 @@
-from django.shortcuts import get_list_or_404, get_object_or_404
-from rest_framework import serializers
+import datetime as dt
+
 from django.db.models import Avg
+from rest_framework import serializers
 
 from reviews.models import (
-    Reviews, Comments, Category, Genre, Title, CustomUser
+    Category, Comments, CustomUser,
+    Genre, Reviews, Title
 )
-import datetime as dt
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -57,8 +58,8 @@ class GenreSerializer(serializers.ModelSerializer):
         fields = ('name', 'slug')
 
 
-class TitlesSerializer(serializers.ModelSerializer):
-    genre = GenreSerializer(many=True, read_only=False)
+class TitlesReadSerializer(serializers.ModelSerializer):
+    genre = GenreSerializer(read_only=False, many=True)
     category = CategoriesSerializer(read_only=False, many=False)
     rating = serializers.SerializerMethodField()
 
@@ -76,21 +77,20 @@ class TitlesSerializer(serializers.ModelSerializer):
         return value
 
     def get_rating(self, obj):
+        return 0
         return int(obj.reviews_score.aggregate(rating=Avg('score'))['rating'])
 
-    def create(self, validated_data):
-        title = Title.objects.create(
-            **validated_data,
-            category=get_object_or_404(
-                Category,
-                slug=self.initial_data['category'],
-            ),
-        )
-        title.genre.set(get_list_or_404(
-            Genre,
-            slug__in=self.initial_data['genre'],
-        ))
-        return title
+
+class TitlesWriteSerializer(TitlesReadSerializer):
+    category = serializers.SlugRelatedField(
+        queryset=Category.objects.all(),
+        slug_field='slug',
+    )
+    genre = serializers.SlugRelatedField(
+        queryset=Genre.objects.all(),
+        slug_field='slug',
+        many=True,
+    )
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -110,4 +110,3 @@ class AdminSerializer(serializers.ModelSerializer):
         fields = (
             'username', 'email', 'first_name', 'last_name', 'bio', 'role'
         )
-

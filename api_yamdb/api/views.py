@@ -1,19 +1,31 @@
-from rest_framework import filters, status, viewsets, permissions
-from rest_framework.decorators import api_view, permission_classes, action
-from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 
-from reviews.models import Genre, Category, Reviews, Title, CustomUser
-from .serializers import (
-    ReviewsSerializer, CommentSerializer, GenreSerializer,
-    CategoriesSerializer, TitlesSerializer, UserSerializer,
-    AdminSerializer,
-)
+from rest_framework import filters, permissions, status, viewsets
+from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.response import Response
+
+from reviews.models import Category, CustomUser, Genre, Reviews, Title
+
 from .permissions import (
-    AuthorOrModeratorOrAdminPermission,
-    AdminUserPermission, AdminOnlyPermission,
+    AdminOnlyPermission, AdminUserPermission,
+    AuthorOrModeratorOrAdminPermission
 )
+from .serializers import (
+    AdminSerializer, CategoriesSerializer,
+    CommentSerializer, GenreSerializer,
+    ReviewsSerializer, TitlesReadSerializer,
+    TitlesWriteSerializer, UserSerializer
+)
+
+
+# class ContentViewSet(viewsets.ModelViewSet):
+#     '''Вьюсетам CommentsViewSet, TitlesViewSet и UserViewSet'''
+#     '''можно было бы наследоваться от такого вьюсета'''
+#     def update(self, request, *args, **kwargs):
+#         if request.method == 'PUT':
+#             return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+#         return super().update(request, *args, **kwargs)
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -67,9 +79,19 @@ class CommentsViewSet(viewsets.ModelViewSet):
 
 class TitlesViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all().order_by('id')
-    serializer_class = TitlesSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('category', 'genre', 'name', 'year')
+    permission_classes = (AdminUserPermission,)
+
+    def get_serializer_class(self):
+        if self.action in ('list', 'retrieve'):
+            return TitlesReadSerializer
+        return TitlesWriteSerializer
+
+    def update(self, request, *args, **kwargs):
+        if request.method == 'PUT':
+            return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return super().update(request, *args, **kwargs)
 
 
 class GenresViewSet(viewsets.ModelViewSet):
