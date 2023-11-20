@@ -1,4 +1,4 @@
-from rest_framework.permissions import BasePermission, SAFE_METHODS
+from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 
 class AuthorOrModeratorOrAdminPermission(BasePermission):
@@ -35,4 +35,3 @@ class AdminOnlyPermission(BasePermission):
         if request.user.is_authenticated:
             return request.user.is_staff or request.user.role == 'admin'
         return False
-
