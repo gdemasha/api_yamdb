@@ -14,7 +14,7 @@ from reviews.models import Category, CustomUser, Genre, Reviews, Title
 
 from .permissions import (
     AdminOnlyPermission, AdminUserPermission,
-    AuthorOrModeratorOrAdminPermission
+    AuthorOrModeratorOrAdminPermission,
 )
 from reviews.constants import SEND_CODE_EMAIL
 
@@ -49,40 +49,33 @@ class UserViewSet(viewsets.ModelViewSet):
 class ReviewsViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewsSerializer
     permission_classes = (AuthorOrModeratorOrAdminPermission,)
-
-    def get_title(self):
-        title_id = self.kwargs['title_id']
-        return get_object_or_404(Title, pk=title_id)
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_queryset(self):
-        return self.get_title.reviews.all().order_by('id')
+        title_id = self.kwargs['title_id']
+        title = get_object_or_404(Title, pk=title_id)
+        return title.reviews.all().order_by('id')
 
     def perform_create(self, serializer):
-        return serializer.save(
-            author=self.request.user,
-            title=self.get_title(),
-        )
+        title_id = self.kwargs['title_id']
+        title = get_object_or_404(Title, pk=title_id)
+        return serializer.save(author=self.request.user, title=title)
 
 
 class CommentsViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = (AuthorOrModeratorOrAdminPermission,)
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_queryset(self):
         review_id = self.kwargs['review_id']
         review = get_object_or_404(Reviews, pk=review_id)
-        return review.title.comments.all()
+        return review.comments.all()
 
     def perform_create(self, serializer):
-        return serializer.save(
-            author=self.request.user,
-            review=self.get_review(),
-        )
-
-    def update(self, request, *args, **kwargs):
-        if request.method == 'PUT':
-            return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
-        return super().update(request, *args, **kwargs)
+        review_id = self.kwargs['review_id']
+        review = get_object_or_404(Reviews, pk=review_id)
+        return serializer.save(author=self.request.user, review=review)
 
 
 class TitlesViewSet(viewsets.ModelViewSet):

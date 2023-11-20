@@ -12,20 +12,9 @@ router.register(
     r'^titles/(?P<title_id>\d+)/reviews', ReviewsViewSet, basename='reviews'
 )
 router.register(
-    r'^titles/(?P<title_id>\d+)/reviews/(?P<review_id>\d+)/$',
-    ReviewsViewSet,
-    basename='review',
-)
-router.register(
     r'^titles/(?P<title_id>\d+)/reviews/(?P<review_id>\d+)/comments',
     CommentsViewSet,
     basename='comments',
-)
-router.register(
-    (r'^titles/(?P<title_id>\d+)/reviews/(?P<review_id>\d+)'
-     r'/comments/(?P<comment_id>\d+)/$'),
-    CommentsViewSet,
-    basename='comment',
 )
 router.register('users', UserViewSet, basename='users')
 router.register('categories', CategoriesViewSet, basename='categories')
