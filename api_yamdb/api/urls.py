@@ -5,7 +5,8 @@ from .views import (
     genre_delete, GenresViewSet,
     category_delete, CategoriesViewSet,
     ReviewsViewSet, TitlesViewSet,
-    CommentsViewSet, UserViewSet
+    CommentsViewSet, UserViewSet,
+    signup, token
 )
 
 router = DefaultRouter()
@@ -37,5 +38,7 @@ router.register('titles', TitlesViewSet, basename='titles')
 urlpatterns = [
     path('v1/genres/<slug:slug>/', genre_delete),
     path('v1/categories/<slug:slug>/', category_delete),
+    path('v1/auth/signup/', signup, name='signup'),
+    path('v1/auth/token/', token, name='token'),
     path('v1/', include(router.urls)),
 ]
