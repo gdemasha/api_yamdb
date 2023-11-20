@@ -1,12 +1,22 @@
-from rest_framework import serializers
+import datetime as dt
 
 from django.db.models import Avg
 from django.contrib.auth.validators import UnicodeUsernameValidator
+from rest_framework import serializers
 
 from reviews.models import (
-    Reviews, Comments, Category, Genre, Title, CustomUser
+    Category, Comments, CustomUser,
+    Genre, Reviews, Title
 )
-import datetime as dt
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = (
+            'username', 'email', 'first_name',
+            'last_name', 'bio', 'role',
+        )
 
 
 class ReviewsSerializer(serializers.ModelSerializer):
@@ -49,8 +59,8 @@ class GenreSerializer(serializers.ModelSerializer):
         fields = ('name', 'slug')
 
 
-class TitlesSerializer(serializers.ModelSerializer):
-    genre = GenreSerializer(many=True, read_only=False)
+class TitlesReadSerializer(serializers.ModelSerializer):
+    genre = GenreSerializer(read_only=False, many=True)
     category = CategoriesSerializer(read_only=False, many=False)
     rating = serializers.SerializerMethodField()
 
@@ -69,13 +79,19 @@ class TitlesSerializer(serializers.ModelSerializer):
 
     def get_rating(self, obj):
         return 0
-
-    def create(self, validated_data):
-        print(validated_data.keys())
-        return super().create(validated_data)
-
-    def get_rating(self, obj):
         return int(obj.reviews_score.aggregate(rating=Avg('score'))['rating'])
+
+
+class TitlesWriteSerializer(TitlesReadSerializer):
+    category = serializers.SlugRelatedField(
+        queryset=Category.objects.all(),
+        slug_field='slug',
+    )
+    genre = serializers.SlugRelatedField(
+        queryset=Genre.objects.all(),
+        slug_field='slug',
+        many=True,
+    )
 
 
 class UserSerializer(serializers.ModelSerializer):

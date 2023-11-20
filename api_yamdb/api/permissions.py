@@ -1,4 +1,4 @@
-from rest_framework.permissions import BasePermission, SAFE_METHODS
+from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 
 class AuthorOrModeratorOrAdminPermission(BasePermission):
@@ -10,16 +10,13 @@ class AuthorOrModeratorOrAdminPermission(BasePermission):
         )
 
     def has_object_permission(self, request, view, obj):
-        if request.method == 'POST':
-            return obj.author == request.user
-        elif request.method == 'PATCH' or request.method == 'DELETE':
-            return (
-                obj.author == request.user
-                or request.user.is_staff == request.user
-                or request.user.role == 'moderator'
-                or request.user.role == 'admin'
-            )
-        return True
+        return (
+            obj.author == request.user
+            or request.method in SAFE_METHODS
+            or request.user.is_staff == request.user.is_authenticated
+            or request.user.role == 'moderator'
+            or request.user.role == 'admin'
+        )
 
 
 class AdminUserPermission(BasePermission):

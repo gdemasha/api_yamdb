@@ -1,63 +1,105 @@
-from rest_framework import filters, status, viewsets, permissions
-from rest_framework.decorators import api_view, action, permission_classes
-from rest_framework.response import Response
-from rest_framework.exceptions import ValidationError
-from rest_framework_simplejwt.tokens import AccessToken
-
 from django.contrib.auth.tokens import default_token_generator
 from django.db import IntegrityError
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 
-from reviews.models import Genre, Category, Reviews, Title, CustomUser
-from .serializers import (
-    ReviewsSerializer, CommentSerializer, GenreSerializer,
-    CategoriesSerializer, TitlesSerializer, UserSerializer,
-    AdminSerializer, AuthSerializer, GetTokenSerializer
-)
+from rest_framework import filters, permissions, status, viewsets
+from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.exceptions import ValidationError
+from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import AccessToken
+
+from reviews.models import Category, CustomUser, Genre, Reviews, Title
+
 from .permissions import (
-    AdminOnlyPermission
-    # AuthorOrModeratorOrAdminPermission
+    AdminOnlyPermission, AdminUserPermission,
+    AuthorOrModeratorOrAdminPermission
 )
 from reviews.constants import SEND_CODE_EMAIL
+
+from .serializers import (
+    AdminSerializer, CategoriesSerializer,
+    CommentSerializer, GenreSerializer,
+    ReviewsSerializer, TitlesReadSerializer,
+    TitlesWriteSerializer, UserSerializer,
+    AuthSerializer, GetTokenSerializer,
+)
+
+
+# class ContentViewSet(viewsets.ModelViewSet):
+#     '''Вьюсетам CommentsViewSet, TitlesViewSet и UserViewSet'''
+#     '''можно было бы наследоваться от такого вьюсета'''
+#     def update(self, request, *args, **kwargs):
+#         if request.method == 'PUT':
+#             return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+#         return super().update(request, *args, **kwargs)
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    lookup_field = 'username'
+    queryset = CustomUser.objects.all()
+    serializer_class = UserSerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('username',)
+    permission_classes = (AdminUserPermission, permissions.IsAuthenticated)
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
 
 class ReviewsViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewsSerializer
-    # permission_classes = (AuthorOrModeratorOrAdminPermission,)
+    permission_classes = (AuthorOrModeratorOrAdminPermission,)
+
+    def get_title(self):
+        title_id = self.kwargs['title_id']
+        return get_object_or_404(Title, pk=title_id)
 
     def get_queryset(self):
-        title_id = self.kwargs['title_id']
-        title = get_object_or_404(Title, pk=title_id)
-        return title.reviews.all().order_by('id')
+        return self.get_title.reviews.all().order_by('id')
 
     def perform_create(self, serializer):
-        title_id = self.kwargs['title_id']
-        title = get_object_or_404(Title, pk=title_id)
-        return serializer.save(author=self.request.user, title=title)
+        return serializer.save(
+            author=self.request.user,
+            title=self.get_title(),
+        )
 
 
 class CommentsViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    # permission_classes = (AuthorOrModeratorOrAdminPermission,)
+    permission_classes = (AuthorOrModeratorOrAdminPermission,)
 
     def get_queryset(self):
         review_id = self.kwargs['review_id']
         review = get_object_or_404(Reviews, pk=review_id)
-        return review.comments.all()
+        return review.title.comments.all()
 
     def perform_create(self, serializer):
-        review_id = self.kwargs['review_id']
-        review = get_object_or_404(Reviews, pk=review_id)
-        return serializer.save(author=self.request.user, review=review)
+        return serializer.save(
+            author=self.request.user,
+            review=self.get_review(),
+        )
+
+    def update(self, request, *args, **kwargs):
+        if request.method == 'PUT':
+            return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return super().update(request, *args, **kwargs)
 
 
 class TitlesViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all().order_by('id')
-    serializer_class = TitlesSerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('category', 'genre', 'name', 'year')
+    permission_classes = (AdminUserPermission,)
+
+    def get_serializer_class(self):
+        if self.action in ('list', 'retrieve'):
+            return TitlesReadSerializer
+        return TitlesWriteSerializer
+
+    def update(self, request, *args, **kwargs):
+        if request.method == 'PUT':
+            return Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return super().update(request, *args, **kwargs)
 
 
 class GenresViewSet(viewsets.ModelViewSet):
@@ -65,6 +107,7 @@ class GenresViewSet(viewsets.ModelViewSet):
     serializer_class = GenreSerializer
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name',)
+    permission_classes = (AdminUserPermission,)
 
 
 class CategoriesViewSet(GenresViewSet):
@@ -73,6 +116,7 @@ class CategoriesViewSet(GenresViewSet):
 
 
 @api_view(['DELETE'])
+@permission_classes((AdminUserPermission,))
 def genre_delete(request, slug):
     genre = get_object_or_404(Genre, slug=slug)
     if request.method == "DELETE":
@@ -81,6 +125,7 @@ def genre_delete(request, slug):
 
 
 @api_view(['DELETE'])
+@permission_classes((AdminUserPermission,))
 def category_delete(request, slug):
     category = get_object_or_404(Category, slug=slug)
     if request.method == "DELETE":
