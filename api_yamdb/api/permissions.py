@@ -13,7 +13,6 @@ class AuthorOrModeratorOrAdminPermission(BasePermission):
         return (
             obj.author == request.user
             or request.method in SAFE_METHODS
-            or request.user.is_staff == request.user.is_authenticated
             or request.user.role == 'moderator'
             or request.user.role == 'admin'
         )

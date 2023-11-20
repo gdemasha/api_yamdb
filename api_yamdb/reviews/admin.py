@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from reviews.models import Category, Genre, Title, Reviews, CustomUser
+from reviews.models import Category, Genre, Title, Review, CustomUser
 
 
 @admin.register(Title)
@@ -19,7 +19,7 @@ class GenreAdmin(CategoriesAdmin):
     pass
 
 
-@admin.register(Reviews)
+@admin.register(Review)
 class ReviewsAdmin(admin.ModelAdmin):
     pass
 

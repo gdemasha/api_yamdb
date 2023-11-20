@@ -93,7 +93,7 @@ class Title(models.Model):
         return self.name
 
 
-class Reviews(models.Model):
+class Review(models.Model):
 
     text = models.TextField()
     pub_date = models.DateTimeField(
@@ -121,12 +121,7 @@ class Reviews(models.Model):
     class Meta:
         verbose_name = 'отзыв'
         verbose_name_plural = 'Отзывы'
-        constraints = [
-            models.UniqueConstraint(
-                fields=['author', 'title'],
-                name='unique_review',
-            )
-        ]
+        unique_together = ('author', 'title')
 
 
 class Comments(models.Model):
@@ -137,7 +132,7 @@ class Comments(models.Model):
         auto_now_add=True,
     )
     review = models.ForeignKey(
-        Reviews,
+        Review,
         on_delete=models.CASCADE,
         related_name='comments',
     )
