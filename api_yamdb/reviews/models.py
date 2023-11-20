@@ -95,12 +95,13 @@ class Title(models.Model):
 
 class Review(models.Model):
 
-    text = models.TextField()
+    text = models.TextField('Текст')
     pub_date = models.DateTimeField(
         'Дата публикации отзыва',
         auto_now_add=True,
     )
     score = models.PositiveIntegerField(
+        'Оценка',
         default=1,
         validators=[
             MaxValueValidator(10),
@@ -110,10 +111,12 @@ class Review(models.Model):
     )
     author = models.ForeignKey(
         CustomUser,
+        verbose_name='Автор отзыва',
         on_delete=models.CASCADE,
     )
     title = models.ForeignKey(
         Title,
+        verbose_name='Произведение',
         on_delete=models.CASCADE,
         related_name='reviews',
     )
@@ -122,6 +125,9 @@ class Review(models.Model):
         verbose_name = 'отзыв'
         verbose_name_plural = 'Отзывы'
         unique_together = ('author', 'title')
+
+    def __str__(self):
+        return f'{self.author} про {self.title}'
 
 
 class Comments(models.Model):

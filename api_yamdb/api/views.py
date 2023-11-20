@@ -1,6 +1,6 @@
 from django.contrib.auth.tokens import default_token_generator
-from django.db import IntegrityError
 from django.core.mail import send_mail
+from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -10,21 +10,20 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
-from reviews.models import Category, CustomUser, Genre, Review, Title
-
+from .filters import TitleFilter
 from .permissions import (
     AdminOnlyPermission, AdminUserPermission,
-    AuthorOrModeratorOrAdminPermission,
+    AuthorOrModeratorOrAdminPermission
+)
+from .serializers import (
+    AdminSerializer, AuthSerializer,
+    CategoriesSerializer, CommentSerializer,
+    GenreSerializer, GetTokenSerializer,
+    ReviewsSerializer, TitlesReadSerializer,
+    TitlesWriteSerializer, UserSerializer
 )
 from reviews.constants import SEND_CODE_EMAIL
-
-from .serializers import (
-    AdminSerializer, CategoriesSerializer,
-    CommentSerializer, GenreSerializer,
-    ReviewsSerializer, TitlesReadSerializer,
-    TitlesWriteSerializer, UserSerializer,
-    AuthSerializer, GetTokenSerializer,
-)
+from reviews.models import Category, CustomUser, Genre, Review, Title
 
 
 class ReviewsViewSet(viewsets.ModelViewSet):
@@ -65,11 +64,14 @@ class CommentsViewSet(viewsets.ModelViewSet):
 
 
 class TitlesViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all().order_by('id')
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('category', 'genre', 'name', 'year')
+    queryset = Title.objects.all().order_by('id').prefetch_related(
+        'reviews', 'genre'
+    ).select_related('category')
+    filter_backends = (filters.SearchFilter, DjangoFilterBackend,)
+    filterset_class = TitleFilter
+    search_fields = ('name',)
     permission_classes = (AdminUserPermission,)
-    http_method_names = ['get', 'post', 'delete', 'patch']
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_serializer_class(self):
         if self.action in ('list', 'retrieve'):
