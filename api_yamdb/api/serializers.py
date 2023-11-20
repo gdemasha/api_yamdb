@@ -1,6 +1,7 @@
 import datetime as dt
 
 from django.db.models import Avg
+from django.contrib.auth.validators import UnicodeUsernameValidator
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
@@ -80,6 +81,24 @@ class AdminSerializer(serializers.ModelSerializer):
         )
 
 
+class AuthSerializer(serializers.Serializer):
+    email = serializers.EmailField(max_length=254, required=True)
+    username = serializers.CharField(
+        max_length=150,
+        validators=[UnicodeUsernameValidator()],
+        required=True
+    )
+
+
+class GetTokenSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(required=True)
+    confirmation_code = serializers.CharField(required=True)
+
+    class Meta:
+        model = CustomUser
+        fields = ('username', 'confirmation_code')
+
+        
 class ReviewsSerializer(serializers.ModelSerializer):
     author = serializers.SlugRelatedField(
         read_only=True,

@@ -112,3 +112,10 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
+
+EMAIL_HOST = 'smtp.mail.ru'
+EMAIL_HOST_USER = 'testapi21331@mail.ru'
+EMAIL_HOST_PASSWORD = 'qeadwrsf213'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
