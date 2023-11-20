@@ -4,7 +4,7 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     CategoriesViewSet, CommentsViewSet, GenresViewSet,
     ReviewsViewSet, TitlesViewSet, UserViewSet,
-    category_delete, genre_delete
+    category_delete, genre_delete, signup, token,
 )
 
 router = DefaultRouter()
@@ -36,5 +36,7 @@ router.register('titles', TitlesViewSet, basename='titles')
 urlpatterns = [
     path('v1/genres/<slug:slug>/', genre_delete),
     path('v1/categories/<slug:slug>/', category_delete),
+    path('v1/auth/signup/', signup, name='signup'),
+    path('v1/auth/token/', token, name='token'),
     path('v1/', include(router.urls)),
 ]

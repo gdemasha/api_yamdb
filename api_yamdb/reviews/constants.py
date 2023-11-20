@@ -10,3 +10,6 @@ ROLE_CHOICE = (
     ('moderator', 'moderator'),
     ('admin', 'admin'),
 )
+
+# Почта для отправки кодов
+SEND_CODE_EMAIL = 'testapi21331@mail.ru'
