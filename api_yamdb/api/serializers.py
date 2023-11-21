@@ -1,13 +1,10 @@
-import datetime as dt
-
-from django.db.models import Avg
 from django.contrib.auth.validators import UnicodeUsernameValidator
-from rest_framework import serializers
+from django.db.models import Avg
 
-from reviews.models import (
-    Category, Comments, CustomUser,
-    Genre, Review, Title,
-)
+from rest_framework import serializers
+from reviews.models import Category, Comments, CustomUser, Genre, Review, Title
+
+import datetime as dt
 
 
 class CategoriesSerializer(serializers.ModelSerializer):
@@ -26,14 +23,14 @@ class GenreSerializer(serializers.ModelSerializer):
 
 class TitlesReadSerializer(serializers.ModelSerializer):
     genre = GenreSerializer(read_only=False, many=True)
-    category = CategoriesSerializer(read_only=False, many=False)
+    category = CategoriesSerializer(read_only=False)
     rating = serializers.SerializerMethodField()
 
     class Meta:
         model = Title
         fields = (
             'id', 'name', 'year', 'rating',
-            'description', 'genre', 'category'
+            'description', 'genre', 'category',
         )
 
     def validate_year(self, value):
@@ -66,7 +63,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = (
-            'username', 'email', 'first_name', 'last_name', 'bio', 'role'
+            'username', 'email', 'first_name', 'last_name', 'bio', 'role',
         )
         read_only_fields = ('role',)
 
@@ -76,7 +73,7 @@ class AdminSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = (
-            'username', 'email', 'first_name', 'last_name', 'bio', 'role'
+            'username', 'email', 'first_name', 'last_name', 'bio', 'role',
         )
 
 
@@ -85,7 +82,7 @@ class AuthSerializer(serializers.Serializer):
     username = serializers.CharField(
         max_length=150,
         validators=[UnicodeUsernameValidator()],
-        required=True
+        required=True,
     )
 
 
