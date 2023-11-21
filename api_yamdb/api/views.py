@@ -25,16 +25,24 @@ from reviews.constants import SEND_CODE_EMAIL
 from reviews.models import Category, CustomUser, Genre, Review, Title
 
 
-class UserViewSet(viewsets.ModelViewSet):
+class CustomBaseModelViewSet(viewsets.ModelViewSet):
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+    permission_classes = (AdminUserPermission,)
+    http_method_names = ['get', 'post', 'patch', 'delete']
+
+    def get_queryset(self):
+        model = self.get_serializer_class().Meta.model
+        return model.objects.all().order_by('id')
+
+
+class UserViewSet(CustomBaseModelViewSet):
     """Вьюсет для пользователя."""
 
-    queryset = CustomUser.objects.all()
     serializer_class = AdminSerializer
-    lookup_field = 'username'
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('username',)
     permission_classes = (AdminOnlyPermission,)
-    http_method_names = ['get', 'post', 'delete', 'patch']
+    lookup_field = 'username'
+    search_fields = ('username',)
 
     @action(
         methods=['GET', 'PATCH', ],
@@ -105,20 +113,15 @@ def token(request):
     return Response(data)
 
 
-class GenresViewSet(viewsets.ModelViewSet):
+class GenresViewSet(CustomBaseModelViewSet):
     """Вьюсет для жанров."""
 
-    queryset = Genre.objects.all().order_by('id')
     serializer_class = GenreSerializer
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('name',)
-    permission_classes = (AdminUserPermission,)
 
 
-class CategoriesViewSet(GenresViewSet):
+class CategoriesViewSet(CustomBaseModelViewSet):
     """Вьюсет для категорий."""
 
-    queryset = Category.objects.all().order_by('id')
     serializer_class = CategoriesSerializer
 
 
@@ -144,17 +147,11 @@ def category_delete(request, slug):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class TitlesViewSet(viewsets.ModelViewSet):
+class TitlesViewSet(CustomBaseModelViewSet):
     """Вьюсет для произведений."""
 
-    queryset = Title.objects.all().order_by('id').prefetch_related(
-        'reviews', 'genre'
-    ).select_related('category')
     filter_backends = (filters.SearchFilter, DjangoFilterBackend,)
     filterset_class = TitleFilter
-    search_fields = ('name',)
-    permission_classes = (AdminUserPermission,)
-    http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_serializer_class(self):
         if self.action in ('list', 'retrieve'):
@@ -162,12 +159,11 @@ class TitlesViewSet(viewsets.ModelViewSet):
         return TitlesWriteSerializer
 
 
-class ReviewsViewSet(viewsets.ModelViewSet):
+class ReviewsViewSet(CustomBaseModelViewSet):
     """Вьюсет для отзывов."""
 
     serializer_class = ReviewsSerializer
     permission_classes = (AuthorOrModeratorOrAdminPermission,)
-    http_method_names = ['get', 'post', 'delete', 'patch']
 
     def get_queryset(self):
         title_id = self.kwargs['title_id']
@@ -185,12 +181,10 @@ class ReviewsViewSet(viewsets.ModelViewSet):
             )
 
 
-class CommentsViewSet(viewsets.ModelViewSet):
+class CommentsViewSet(ReviewsViewSet):
     """Вьюсет для комментариев."""
 
     serializer_class = CommentSerializer
-    permission_classes = (AuthorOrModeratorOrAdminPermission,)
-    http_method_names = ['get', 'post', 'delete', 'patch']
 
     def get_queryset(self):
         review_id = self.kwargs['review_id']
