@@ -35,5 +35,5 @@ class UserAdmin(admin.ModelAdmin):
         'first_name',
         'last_name',
     )
-    search_fields = ('username', 'role',)
+    search_fields = ('username', 'role')
     list_filter = ('username',)

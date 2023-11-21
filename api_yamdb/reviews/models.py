@@ -2,22 +2,40 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-from reviews.constants import MAX_LENGTH_NAME, MAX_LENGTH_SLUG, ROLE_CHOICE
+from reviews.constants import (
+    MAX_LENGTH_EMAIL,
+    MAX_LENGTH_NAME,
+    MAX_LENGTH_ROLE,
+    MAX_LENGTH_SLUG,
+    MAX_LENGTH_TEXT,
+    ROLE_CHOICE,
+)
 
 
 class CustomUser(AbstractUser):
-    email = models.EmailField('Почта', max_length=254, unique=True,)
-    bio = models.CharField('Био', max_length=254, null=True, blank=True,)
+    """Кастомная модель пользователя."""
+
+    email = models.EmailField(
+        'Почта',
+        max_length=MAX_LENGTH_EMAIL,
+        unique=True,
+    )
+    bio = models.CharField(
+        'Био',
+        max_length=MAX_LENGTH_TEXT,
+        null=True,
+        blank=True,
+    )
     role = models.CharField(
         'Роль',
-        max_length=9,
+        max_length=MAX_LENGTH_ROLE,
         choices=ROLE_CHOICE,
         default='user',
     )
 
     class Meta:
         ordering = ('username',)
-        verbose_name = 'Пользователь'
+        verbose_name = 'пользователь'
         verbose_name_plural = 'Пользователи'
 
     def __str__(self):
@@ -25,7 +43,12 @@ class CustomUser(AbstractUser):
 
 
 class Category(models.Model):
-    name = models.CharField('Название категории', max_length=MAX_LENGTH_NAME)
+    """Модель категории."""
+
+    name = models.CharField(
+        'Название категории',
+        max_length=MAX_LENGTH_NAME,
+    )
     slug = models.SlugField(
         'URL категории',
         max_length=MAX_LENGTH_SLUG,
@@ -46,7 +69,12 @@ class Category(models.Model):
 
 
 class Genre(models.Model):
-    name = models.CharField('Название жанра', max_length=MAX_LENGTH_NAME)
+    """Модель жанра."""
+
+    name = models.CharField(
+        'Название жанра',
+        max_length=MAX_LENGTH_NAME,
+    )
     slug = models.SlugField(
         'URL жанра',
         max_length=MAX_LENGTH_SLUG,
@@ -66,23 +94,28 @@ class Genre(models.Model):
 
 
 class Title(models.Model):
+    """Модель произведения."""
+
     name = models.CharField(
         'Название произведения',
         max_length=MAX_LENGTH_NAME,
     )
-    description = models.TextField('Описание')
+    description = models.TextField(
+        'Описание',
+        max_length=MAX_LENGTH_TEXT,
+    )
     year = models.IntegerField('Год релиза')
     category = models.ForeignKey(
         Category,
-        verbose_name='Тип произведения',
         on_delete=models.SET_NULL,
-        related_name='titles',
         null=True,
+        related_name='titles',
+        verbose_name='Тип произведения',
     )
     genre = models.ManyToManyField(
         Genre,
-        verbose_name='Жанр(ы) произведения',
         related_name='titles',
+        verbose_name='Жанр(ы) произведения',
     )
 
     class Meta:
@@ -94,6 +127,7 @@ class Title(models.Model):
 
 
 class Review(models.Model):
+    """Модель отзыва."""
 
     text = models.TextField('Текст')
     pub_date = models.DateTimeField(
@@ -111,14 +145,14 @@ class Review(models.Model):
     )
     author = models.ForeignKey(
         CustomUser,
-        verbose_name='Автор отзыва',
         on_delete=models.CASCADE,
+        verbose_name='Автор отзыва',
     )
     title = models.ForeignKey(
         Title,
-        verbose_name='Произведение',
         on_delete=models.CASCADE,
         related_name='reviews',
+        verbose_name='Произведение',
     )
 
     class Meta:
@@ -131,8 +165,12 @@ class Review(models.Model):
 
 
 class Comments(models.Model):
+    """Модель комментария."""
 
-    text = models.TextField()
+    text = models.TextField(
+        'Комментарий',
+        max_length=MAX_LENGTH_TEXT,
+    )
     pub_date = models.DateTimeField(
         'Дата публикации комментария',
         auto_now_add=True,
@@ -150,3 +188,6 @@ class Comments(models.Model):
     class Meta:
         verbose_name = 'комментарий'
         verbose_name_plural = 'Комментарии'
+
+    def __str__(self):
+        return f'Комментарий {self.author} к {self.review}'
