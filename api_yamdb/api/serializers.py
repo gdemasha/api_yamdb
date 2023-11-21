@@ -8,17 +8,6 @@ from reviews.constants import MAX_LENGTH_EMAIL, MAX_LENGTH_USERNAME
 from reviews.models import Category, Comments, CustomUser, Genre, Review, Title
 
 
-class UserSerializer(serializers.ModelSerializer):
-    """Сериализатор для пользователя 'user'."""
-
-    class Meta:
-        model = CustomUser
-        fields = (
-            'username', 'email', 'first_name', 'last_name', 'bio', 'role',
-        )
-        read_only_fields = ('role',)
-
-
 class AdminSerializer(serializers.ModelSerializer):
     """Сериализатор для пользователя 'admin'."""
 
@@ -27,6 +16,12 @@ class AdminSerializer(serializers.ModelSerializer):
         fields = (
             'username', 'email', 'first_name', 'last_name', 'bio', 'role',
         )
+
+
+class UserSerializer(AdminSerializer):
+    """Сериализатор для пользователя 'user'."""
+
+    role = serializers.StringRelatedField()
 
 
 class AuthSerializer(serializers.Serializer):
@@ -122,14 +117,8 @@ class ReviewsSerializer(serializers.ModelSerializer):
         fields = ('id', 'text', 'author', 'score', 'pub_date')
 
 
-class CommentSerializer(serializers.ModelSerializer):
+class CommentSerializer(ReviewsSerializer):
     """Сериализатор для комментариев."""
-
-    author = serializers.SlugRelatedField(
-        read_only=True,
-        slug_field='username',
-        default=serializers.CurrentUserDefault(),
-    )
 
     class Meta:
         model = Comments
