@@ -73,15 +73,14 @@ def signup(request):
 
     if user.username == 'me':
         return Response(status=status.HTTP_400_BAD_REQUEST)
-    else:
-        confirmation_code = default_token_generator.make_token(user)
-        send_mail(
-            subject='Код для входа',
-            message=f'Код для входа {confirmation_code}',
-            from_email=EMAIL_HOST_USER,
-            recipient_list=[user.email],
-        )
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    confirmation_code = default_token_generator.make_token(user)
+    send_mail(
+        subject='Код для входа',
+        message=f'Код для входа {confirmation_code}',
+        from_email=EMAIL_HOST_USER,
+        recipient_list=[user.email],
+    )
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
