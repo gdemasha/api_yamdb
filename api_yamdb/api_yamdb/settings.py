@@ -1,5 +1,10 @@
 from datetime import timedelta
+from dotenv import load_dotenv
 from pathlib import Path
+import os
+
+load_dotenv()
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -113,8 +118,8 @@ SIMPLE_JWT = {
 }
 
 EMAIL_HOST = 'smtp.mail.ru'
-EMAIL_HOST_USER = 'testapi21331@mail.ru'
-EMAIL_HOST_PASSWORD = 'qeadwrsf213'
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_PASSWORD')
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False

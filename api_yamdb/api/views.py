@@ -23,7 +23,7 @@ from .serializers import (
     TitlesWriteSerializer, UserSerializer,
 )
 from api_yamdb.settings import EMAIL_HOST_USER
-from reviews.models import Category, User, Genre, Review, Title
+from reviews.models import Category, Genre, Review, Title, User
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -127,10 +127,8 @@ class CategoriesViewSet(GenresViewSet):
 def genre_delete(request, slug):
     """Вью-функция для запроса на удаление жанра."""
 
-    genre = get_object_or_404(Genre, slug=slug)
-    if request.method == 'DELETE':
-        genre.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    get_object_or_404(Genre, slug=slug).delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 @api_view(['DELETE'])
@@ -138,10 +136,8 @@ def genre_delete(request, slug):
 def category_delete(request, slug):
     """Вью-функция для запроса на удаление категории."""
 
-    category = get_object_or_404(Category, slug=slug)
-    if request.method == 'DELETE':
-        category.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    get_object_or_404(Category, slug=slug).delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class TitlesViewSet(viewsets.ModelViewSet):

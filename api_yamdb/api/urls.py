@@ -22,11 +22,13 @@ router.register(
     CommentsViewSet,
     basename='comments',
 )
-
+url_auth = [
+    path('auth/signup/', signup, name='signup'),
+    path('auth/token/', token, name='token'),
+]
 urlpatterns = [
     path('v1/genres/<slug:slug>/', genre_delete),
     path('v1/categories/<slug:slug>/', category_delete),
-    path('v1/auth/signup/', signup, name='signup'),
-    path('v1/auth/token/', token, name='token'),
+    path('v1/', include(url_auth)),
     path('v1/', include(router.urls)),
 ]
