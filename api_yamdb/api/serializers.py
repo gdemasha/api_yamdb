@@ -1,32 +1,26 @@
 import datetime as dt
 
 from django.contrib.auth.validators import UnicodeUsernameValidator
-from django.db.models import Avg
 from rest_framework import serializers
 
 from reviews.constants import MAX_LENGTH_EMAIL, MAX_LENGTH_USERNAME
-from reviews.models import Category, Comments, CustomUser, Genre, Review, Title
-
-
-class UserSerializer(serializers.ModelSerializer):
-    """Сериализатор для пользователя 'user'."""
-
-    class Meta:
-        model = CustomUser
-        fields = (
-            'username', 'email', 'first_name', 'last_name', 'bio', 'role',
-        )
-        read_only_fields = ('role',)
+from reviews.models import Category, Comments, User, Genre, Review, Title
 
 
 class AdminSerializer(serializers.ModelSerializer):
     """Сериализатор для пользователя 'admin'."""
 
     class Meta:
-        model = CustomUser
+        model = User
         fields = (
             'username', 'email', 'first_name', 'last_name', 'bio', 'role',
         )
+
+
+class UserSerializer(AdminSerializer):
+    """Сериализатор для пользователя 'user'."""
+
+    role = serializers.StringRelatedField()
 
 
 class AuthSerializer(serializers.Serializer):
@@ -47,7 +41,7 @@ class GetTokenSerializer(serializers.ModelSerializer):
     confirmation_code = serializers.CharField(required=True)
 
     class Meta:
-        model = CustomUser
+        model = User
         fields = ('username', 'confirmation_code')
 
 
@@ -72,7 +66,7 @@ class TitlesReadSerializer(serializers.ModelSerializer):
 
     genre = GenreSerializer(read_only=False, many=True)
     category = CategoriesSerializer(read_only=False)
-    rating = serializers.SerializerMethodField()
+    rating = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Title
@@ -83,15 +77,9 @@ class TitlesReadSerializer(serializers.ModelSerializer):
 
     def validate_year(self, value):
         year = dt.date.today().year
-        if not (value <= year):
+        if year < value:
             raise serializers.ValidationError('Проверьте год произведения!')
         return value
-
-    def get_rating(self, obj):
-        score_title = Review.objects.filter(title_id=obj.id)
-        if score_title.count() != 0:
-            return int(score_title.aggregate(Avg('score'))['score__avg'])
-        return None
 
 
 class TitlesWriteSerializer(TitlesReadSerializer):
@@ -122,14 +110,8 @@ class ReviewsSerializer(serializers.ModelSerializer):
         fields = ('id', 'text', 'author', 'score', 'pub_date')
 
 
-class CommentSerializer(serializers.ModelSerializer):
+class CommentSerializer(ReviewsSerializer):
     """Сериализатор для комментариев."""
-
-    author = serializers.SlugRelatedField(
-        read_only=True,
-        slug_field='username',
-        default=serializers.CurrentUserDefault(),
-    )
 
     class Meta:
         model = Comments

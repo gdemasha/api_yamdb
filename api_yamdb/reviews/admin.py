@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from reviews.models import Category, CustomUser, Genre, Review, Title
+from reviews.models import Category, User, Genre, Review, Title
 
 
 @admin.register(Title)
@@ -25,7 +25,7 @@ class ReviewsAdmin(admin.ModelAdmin):
     list_filter = ('author', 'title')
 
 
-@admin.register(CustomUser)
+@admin.register(User)
 class UserAdmin(admin.ModelAdmin):
     list_display = (
         'username',
