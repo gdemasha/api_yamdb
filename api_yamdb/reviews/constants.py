@@ -18,12 +18,14 @@ MAX_LENGTH_USERNAME = 150
 # Максимальная длина role
 MAX_LENGTH_ROLE = 9
 
+# Пользователи
+ADMIN = 'admin'
+MODERATOR = 'moderator'
+USER = 'user'
+
 # Выбор пользователя
 ROLE_CHOICE = (
-    ('user', 'user'),
-    ('moderator', 'moderator'),
-    ('admin', 'admin'),
+    (USER, USER),
+    (MODERATOR, MODERATOR),
+    (ADMIN, ADMIN),
 )
-
-# Почта для отправки кодов
-SEND_CODE_EMAIL = 'testapi21331@mail.ru'

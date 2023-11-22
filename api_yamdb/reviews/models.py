@@ -9,10 +9,11 @@ from reviews.constants import (
     MAX_LENGTH_SLUG,
     MAX_LENGTH_TEXT,
     ROLE_CHOICE,
+    USER,
 )
 
 
-class CustomUser(AbstractUser):
+class User(AbstractUser):
     """Кастомная модель пользователя."""
 
     email = models.EmailField(
@@ -30,7 +31,7 @@ class CustomUser(AbstractUser):
         'Роль',
         max_length=MAX_LENGTH_ROLE,
         choices=ROLE_CHOICE,
-        default='user',
+        default=USER,
     )
 
     class Meta:
@@ -144,7 +145,7 @@ class Review(models.Model):
         blank=True,
     )
     author = models.ForeignKey(
-        CustomUser,
+        User,
         on_delete=models.CASCADE,
         verbose_name='Автор отзыва',
     )
@@ -181,7 +182,7 @@ class Comments(models.Model):
         related_name='comments',
     )
     author = models.ForeignKey(
-        CustomUser,
+        User,
         on_delete=models.CASCADE,
     )
 
