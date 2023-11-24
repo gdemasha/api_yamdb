@@ -26,7 +26,6 @@ from .serializers import (
 from reviews.models import Category, Genre, Review, Title, User
 
 
-
 class UserViewSet(viewsets.ModelViewSet):
     """Вьюсет для пользователя."""
 

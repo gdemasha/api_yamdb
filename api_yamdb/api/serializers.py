@@ -4,7 +4,7 @@ from django.contrib.auth.validators import UnicodeUsernameValidator
 from rest_framework import serializers
 
 from reviews.constants import MAX_LENGTH_EMAIL, MAX_LENGTH_USERNAME
-from reviews.models import Category, Comments, User, Genre, Review, Title
+from reviews.models import Category, Comments, Genre, Review, Title, User
 
 
 class AdminSerializer(serializers.ModelSerializer):
