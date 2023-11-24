@@ -76,8 +76,7 @@ class TitlesReadSerializer(serializers.ModelSerializer):
         )
 
     def validate_year(self, value):
-        year = dt.date.today().year
-        if year < value:
+        if dt.date.today().year < value:
             raise serializers.ValidationError('Проверьте год произведения!')
         return value
 
