@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.db import IntegrityError
@@ -22,8 +23,8 @@ from .serializers import (
     ReviewsSerializer, TitlesReadSerializer,
     TitlesWriteSerializer, UserSerializer,
 )
-from api_yamdb.settings import EMAIL_HOST_USER
 from reviews.models import Category, Genre, Review, Title, User
+
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -73,14 +74,15 @@ def signup(request):
 
     if user.username == 'me':
         return Response(status=status.HTTP_400_BAD_REQUEST)
-    confirmation_code = default_token_generator.make_token(user)
-    send_mail(
-        subject='Код для входа',
-        message=f'Код для входа {confirmation_code}',
-        from_email=EMAIL_HOST_USER,
-        recipient_list=[user.email],
-    )
-    return Response(serializer.data, status=status.HTTP_200_OK)
+    else:
+        confirmation_code = default_token_generator.make_token(user)
+        send_mail(
+            subject='Код для входа',
+            message=f'Код для входа {confirmation_code}',
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[user.email],
+        )
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
@@ -100,8 +102,7 @@ def token(request):
     ):
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
-    data = {'token': str(AccessToken.for_user(user))}
-    return Response(data)
+    return Response({'token': str(AccessToken.for_user(user))})
 
 
 class GenresViewSet(viewsets.ModelViewSet):
@@ -142,15 +143,14 @@ def category_delete(request, slug):
 class TitlesViewSet(viewsets.ModelViewSet):
     """Вьюсет для произведений."""
 
-    queryset = (Title.objects
-                .annotate(
-                    rating=Avg('reviews__score'),
-                ).prefetch_related(
-                    'reviews', 'genre',
-                ).select_related(
-                    'category',
-                ).order_by('id')
-                )
+    queryset = Title.objects.annotate(
+        rating=Avg('reviews__score'),
+    ).prefetch_related(
+        'reviews',
+        'genre',
+    ).select_related(
+        'category',
+    ).order_by('id')
     filter_backends = (filters.SearchFilter, DjangoFilterBackend,)
     filterset_class = TitleFilter
     search_fields = ('name',)
